@@ -1,6 +1,6 @@
 import fetch from 'isomorphic-fetch'
 
-// The ajax helper function
+// AJAX func
 export const resource = (method, endpoint, payload) => {
 	const url = `http://localhost:3000/${endpoint}`
 	const options = { method, headers: { 'Content-Type': 'application/json' }}

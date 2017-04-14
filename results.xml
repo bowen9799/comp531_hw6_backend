@@ -1,0 +1,27 @@
+<testsuite name="Mocha Tests" tests="24" failures="0" errors="0" skipped="0" timestamp="Fri, 14 Apr 2017 21:13:24 GMT" time="0.184">
+<testcase classname="Articles Tests" name="should GET all articles" time="0.031"/>
+<testcase classname="Articles Tests" name="should GET articles by Alice" time="0.006"/>
+<testcase classname="Articles Tests" name="should GET articles of ID 0" time="0.003"/>
+<testcase classname="Articles Tests" name="should PUT edit to the article with ID 0" time="0.015"/>
+<testcase classname="Articles Tests" name="should not PUT edit to an article if not the author" time="0.003"/>
+<testcase classname="Articles Tests" name="should PUT edit to the comment with ID 0 of article ID 
+		1" time="0.006"/>
+<testcase classname="Articles Tests" name="should POST a new article" time="0.009"/>
+<testcase classname="Articles Tests" name="should PUT new comment to article with ID 1" time="0.006"/>
+<testcase classname="Articles Tests" name="should not PUT edit to a comment if not the author" time="0.002"/>
+<testcase classname="Profile Tests" name="should GET headline" time="0.002"/>
+<testcase classname="Profile Tests" name="should GET headline for a user" time="0.002"/>
+<testcase classname="Profile Tests" name="should GET headlines for multiple users" time="0.003"/>
+<testcase classname="Profile Tests" name="should PUT headline with persistence" time="0.004"/>
+<testcase classname="Profile Tests" name="should GET avatar" time="0.002"/>
+<testcase classname="Profile Tests" name="should GET avatar for a user" time="0.002"/>
+<testcase classname="Profile Tests" name="should GET avatars for multiple users" time="0.002"/>
+<testcase classname="Profile Tests" name="should PUT avatar with persistence" time="0.006"/>
+<testcase classname="Profile Tests" name="should GET email" time="0.003"/>
+<testcase classname="Profile Tests" name="should GET email for a user" time="0.002"/>
+<testcase classname="Profile Tests" name="should PUT email with persistence" time="0.006"/>
+<testcase classname="Profile Tests" name="should GET zipcode" time="0.002"/>
+<testcase classname="Profile Tests" name="should GET zipcode for a user" time="0.001"/>
+<testcase classname="Profile Tests" name="should PUT zipcode with persistence" time="0.004"/>
+<testcase classname="Profile Tests" name="should GET dob" time="0.004"/>
+</testsuite>

@@ -1,46 +1,45 @@
-// Handles all profile-related requests
+// Handles profile req
 
-// Constants
 const loggedInUser = 'bl19'
 
 const profiles = [
 	{
 		username: 'bowen9799',
-		headline: 'hi',
+		headline: 'qa',
 		email: 'a@b',
-		zipcode: 12345,
-		avatar: 'a1',
-		dob: 123
+		zipcode: 11111,
+		avatar: 'av1',
+		dob: 111
 	},
 	{
 		username: 'Alice',
-		headline: 'hello',
+		headline: 'ws',
 		email: 'c@d',
-		zipcode: 11111,
-		avatar: 'a2',
-		dob: 456
+		zipcode: 22222,
+		avatar: 'av2',
+		dob: 222
 	},{
 		username: 'bl19',
-		headline: 'old',
+		headline: 'ed',
 		email: 'e@f',
-		zipcode: 77005,
-		avatar: 'a3',
-		dob: 789
+		zipcode: 33333,
+		avatar: 'av3',
+		dob: 333
 	}
 ]
 
-// Helper function to retrieve specific information
-const extract = (type) => (p) => {
+// Fetch info for further processing
+const fetch = (type) => (p) => {
 	let info = { username: p.username }
 	info[type] = p[type]
 	return info
 }
 
-// Template GET handler for array responses
-const getCollection = (type) => (req, res) => {
+// GET handler for multiple responses
+const getPlural = (type) => (req, res) => {
 	const key = type + 's'
 	let payload = {}
-	payload[key] = profiles.map(extract(type))
+	payload[key] = profiles.map(fetch(type))
 	if (req.params.user !== undefined) {
 		const users = req.params.user.split(',')
 		payload[key] = payload[key].filter((p) => users.includes(p.username))
@@ -50,37 +49,37 @@ const getCollection = (type) => (req, res) => {
 	res.send(payload)
 }
 
-// Template GET handler for non-array responses
-const getItem = (type) => (req, res) => {
+// GET handler for single responses
+const getSingle = (type) => (req, res) => {
 	const user = req.params.user !== undefined ? req.params.user : loggedInUser
 	const p = profiles.find((p) => p.username === user)
 	if (p === undefined) {
 		return res.status(404).send('User not found')
 	} else {
-		return res.send(extract(type)(p))
+		return res.send(fetch(type)(p))
 	}
 }
 
-// Template PUT handler for non-array responses
-const putItem = (type) => (req, res) => {
+// PUT handler for single responses
+const putSingle = (type) => (req, res) => {
 	const input = req.body[type]
 	const p = profiles.find((p) => p.username === loggedInUser)
 	if (p === undefined) {
 		return res.status(404).send('User not found')
 	} else {
 		p[type] = input
-		return res.send(extract(type)(p))
+		return res.send(fetch(type)(p))
 	}
 }
 
 module.exports = app => {
-     app.get('/headlines/:user?', getCollection('headline'))
-     app.put('/headline', putItem('headline'))
-     app.get('/avatars/:user?', getCollection('avatar'))
-     app.put('/avatar', putItem('avatar'))
-     app.get('/zipcode/:user?', getItem('zipcode'))
-     app.put('/zipcode', putItem('zipcode'))
-     app.get('/email/:user?', getItem('email'))
-     app.put('/email', putItem('email'))
-     app.get('/dob', getItem('dob'))
+     app.get('/headlines/:user?', getPlural('headline'))
+     app.put('/headline', putSingle('headline'))
+     app.get('/avatars/:user?', getPlural('avatar'))
+     app.put('/avatar', putSingle('avatar'))
+     app.get('/zipcode/:user?', getSingle('zipcode'))
+     app.put('/zipcode', putSingle('zipcode'))
+     app.get('/email/:user?', getSingle('email'))
+     app.put('/email', putSingle('email'))
+     app.get('/dob', getSingle('dob'))
 }

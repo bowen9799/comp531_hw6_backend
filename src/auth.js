@@ -1,9 +1,7 @@
-// Handles all authentication-related requests
+// Handles authentication req
 
-// Constants
 const username = 'bl19'
 
-// Handlers
 const login = (req, res) => {
 	return res.send({
 		username,
@@ -29,7 +27,7 @@ const logout = (req, res) => {
 const password = (req, res) => {
 	return res.send({
 		username,
-		status: 'will not change'
+		status: 'password'
 	})
 }
 

@@ -1,10 +1,8 @@
-// Handles all following-related requests
+// Handles following req
 
-// Constants
 const username = 'bl19'
 
-// Handlers
-// GET handler -> /following
+// GET /following
 const getFollowing = (req, res) => {
 	return res.send({
 		username,
@@ -12,7 +10,7 @@ const getFollowing = (req, res) => {
 	})
 }
 
-// PUT handler -> /following
+// PUT /following
 const putFollowing = (req, res) => {
 	return res.send({
 		username,
@@ -20,7 +18,7 @@ const putFollowing = (req, res) => {
 	})
 }
 
-// DELETE handler -> /following
+// DELETE /following
 const deleteFollowing = (req, res) => {
 	return res.send({
 		username,

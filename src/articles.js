@@ -1,6 +1,6 @@
 // Handle all article-related requests
 
-// Hard-coded data
+// Hard-coded user and articles
 const loggedInUser = 'bl19'
 
 const articles = [{
@@ -23,7 +23,7 @@ const articles = [{
 		author: 'Alice',
 		commentId: 0,
 		date: new Date('2015-08-31T13:54:03.838Z'),
-		text: 'not gonna change'
+		text: 'ellentesque commodo eros a enim'
 	}],
 	author: 'bl19'
 }, {
@@ -41,7 +41,7 @@ const articles = [{
 		author: 'bl19',
 		commentId: 0,
 		date: new Date('2015-08-07T13:54:03.838Z'),
-		text: 'uhhhhh'
+		text: 'ellentesque commodo eros a enim'
 	}],
 	'author': 'Alice'
 }, {
@@ -55,12 +55,16 @@ const articles = [{
 	'nostra, per inceptos hymenaeos.\r',
 	date: new Date('2015-08-08T07:19:07.759Z'),
 	img: null,
-	comments: [],
-	author: 'bl19'
+	comments: [{
+		author: 'bl19',
+		commentId: 0,
+		date: new Date('2015-08-07T13:54:03.838Z'),
+		text: 'ellentesque commodo eros a enim'
+	}],
+	author: 'bl19test'
 }]
 
-// HTTP Request Handlers
-// GET handler -> /articles
+// GET /articles handler
 const getArticles = (req, res) => {
 	res.send({
 		articles: req.params.id === undefined ? articles : (
@@ -70,32 +74,29 @@ const getArticles = (req, res) => {
 	})
 }
 
-// PUT handler -> /articles
+// PUT /articles handler
 const putArticles = (req, res) => {
-	if (req.params.id === undefined || req.body.text === undefined) {
+	if (req.body.text === undefined || req.params.id === undefined) {
 		return res.status(400).send('Bad Request')
 	}
-	const postId = +req.params.id
+	const articleId = +req.params.id
 	const message = req.body.text
-	const idx = articles.findIndex((article) => article._id === postId)
+	const idx = articles.findIndex((article) => article._id === articleId)
 	if (idx === -1) {
-		return res.status(404).send(`Article of ID ${postId} Not Found`)
+		return res.status(404).send(`Article number ${articleId} Not Found`)
 	}
-	// Edit article
 	if (req.body.commentId === undefined) {
 		if (articles[idx].author !== loggedInUser) {
 			return res.status(403)
-				.send('Forbidden: Only author can edit this article')
+				.send('Unauthorized')
 		}
 		articles[idx].text = message
 		return res.send({
 			articles: [articles[idx]]
 		})
 	}
-
 	const commentId = +req.body.commentId
 	const comments = articles[idx].comments
-	// Post new comment
 	if (commentId === -1) {
 		comments.push({
 			author: loggedInUser,
@@ -107,24 +108,22 @@ const putArticles = (req, res) => {
 			articles: [articles[idx]]
 		})
 	}
-
-	const idxc = comments.findIndex((comment) => 
+	const commentIdx = comments.findIndex((comment) => 
 		comment.commentId === commentId)
-	if (idxc === -1) {
-		return res.status(404).send(`Comment of ID ${commentId} Not Found`)
+	if (commentIdx === -1) {
+		return res.status(404).send(`Comment number ${commentId} Not Found`)
 	}
-	if (comments[idxc].author !== loggedInUser) {
+	if (comments[commentIdx].author !== loggedInUser) {
 		return res.status(403)
-			.send('Forbidden: Only author can edit this comment')
+			.send('Unauthorized')
 	}
-	// Edit comment
-	comments[idxc].text = message
+	comments[commentIdx].text = message
 	return res.send({
 		articles: [articles[idx]]
 	})
 }
 
-// POST handler -> /article
+// POST /article handler
 const postArticle = (req, res) => {
 	if (req.body.text === undefined) {
 		return res.status(400).send('Bad Request')
@@ -143,7 +142,7 @@ const postArticle = (req, res) => {
 }
 
 module.exports = app => {
+	 app.post('/article', postArticle)
      app.get('/articles/:id?', getArticles)
      app.put('/articles/:id', putArticles)
-     app.post('/article', postArticle)
 }

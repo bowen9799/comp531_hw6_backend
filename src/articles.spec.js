@@ -1,41 +1,39 @@
 import { expect } from 'chai'
 import { resource } from './ajax'
 
-// Validate the format of response article in every case
-const validateArticleFormat = (articles) => {
-	expect(articles).to.be.an('array')
-	articles.forEach((article) => {
-		expect(article._id).to.be.a('number')
-		// Test for integer id
-		expect(article._id % 1).to.be.equal(0)
-		expect(article.author).to.be.a('string')
-		expect(article.text).to.be.a('string')
-		expect(article.date).to.be.a('string')
-		if (article.img) {
-			expect(article.img).to.be.a('string')
-		}
-		validateCommentFormat(article.comments)
-	})
-}
-
-// Validate the format of response comment in every case
-const validateCommentFormat = (comments) => {
+// Validate response comments
+const validateComment = (comments) => {
 	expect(comments).to.be.an('array')
 	comments.forEach((comment) => {
 		expect(comment.author).to.be.a('string')
 		expect(comment.commentId).to.be.a('number')
-		// Test for integer id
 		expect(comment.commentId % 1).to.be.equal(0)
 		expect(comment.date).to.be.a('string')
 		expect(comment.text).to.be.a('string')
 	})
 }
 
-// Validate persistency of data previously PUT/POSTed
-const validatePersistency = (text, postId, postCnt, commentId) =>
+// Validate response articles
+const validateArticle = (articles) => {
+	expect(articles).to.be.an('array')
+	articles.forEach((article) => {
+		expect(article._id).to.be.a('number')
+		expect(article._id % 1).to.be.equal(0)
+		expect(article.text).to.be.a('string')
+		expect(article.author).to.be.a('string')
+		expect(article.date).to.be.a('string')
+		if (article.img) {
+			expect(article.img).to.be.a('string')
+		}
+		validateComment(article.comments)
+	})
+}
+
+// Validate persistence
+const validatePersistence = (text, postId, postCnt, commentId) =>
 	resource('GET', 'articles')
 		.then((body) => {
-			validateArticleFormat(body.articles)
+			validateArticle(body.articles)
 			if (postCnt != -1) {
 				expect(body.articles.length).to.equal(postCnt)
 			}
@@ -53,21 +51,21 @@ const validatePersistency = (text, postId, postCnt, commentId) =>
 		})
 
 
-describe('Test Articles Stubs', () => {
+describe('Articles Tests', () => {
 	it('should GET all articles', (done) => {
 		resource('GET', 'articles')
 			.then((body) => {
-				validateArticleFormat(body.articles)
+				validateArticle(body.articles)
 			})
 			.then(done)
 			.catch(done)
 	})
 
 	const author = 'Alice'
-	it(`should GET all articles by ${author}`, (done) => {
+	it(`should GET articles by ${author}`, (done) => {
 		resource('GET', `articles/${author}`)
 			.then((body) => {
-				validateArticleFormat(body.articles)
+				validateArticle(body.articles)
 				body.articles.forEach((article) =>
 					expect(article.author).to.be.equal(author))
 			})
@@ -76,10 +74,10 @@ describe('Test Articles Stubs', () => {
 	})
 
 	const postId = 0
-	it(`should GET all articles of post ID ${postId}`, (done) => {
+	it(`should GET articles of ID ${postId}`, (done) => {
 		resource('GET', `articles/${postId}`)
 			.then((body) => {
-				validateArticleFormat(body.articles)
+				validateArticle(body.articles)
 				body.articles.forEach((article) =>
 					expect(article._id).to.be.equal(postId))
 			})
@@ -88,24 +86,24 @@ describe('Test Articles Stubs', () => {
 	})
 
 	const loggedInUser = 'bl19'
-	const newText = 'new article content'
-	it(`should PUT edit to article of post ID ${postId}`, (done) => {
+	const newText = 'aaa'
+	it(`should PUT edit to the article with ID ${postId}`, (done) => {
 		resource('PUT', `articles/${postId}`, { text: newText })
 			.then((body) => {
-				validateArticleFormat(body.articles)
+				validateArticle(body.articles)
 				expect(body.articles.length).to.equal(1)
 				expect(body.articles[0].author).to.be.equal(loggedInUser)
 				expect(body.articles[0]._id).to.be.equal(postId)
 				expect(body.articles[0].text).to.be.equal(newText)
-				return validatePersistency(newText, postId, -1)
+				return validatePersistence(newText, postId, -1)
 			})
 			.then(done)
 			.catch(done)
 	})
 
-	const notOwnedPostId = 1
-	it('should not PUT edit to an article not owned', (done) => {
-		resource('PUT', `articles/${notOwnedPostId}`, { text: newText })
+	const badPostId = 1
+	it('should not PUT edit to an article if not the author', (done) => {
+		resource('PUT', `articles/${badPostId}`, { text: newText })
 			.then(() => {
 				throw new Error(-1)
 			})
@@ -117,35 +115,54 @@ describe('Test Articles Stubs', () => {
 	})
 
 	const commentId = 0
-	const commentEdition = 'abc'
-	it(`should PUT edit to a comment of ID ${commentId} of article ID 
-		${notOwnedPostId}`, (done) => {
-		resource('PUT', `articles/${notOwnedPostId}`, 
-			{ text: commentEdition, commentId })
+	const commentEdit = 'qqq'
+	it(`should PUT edit to the comment with ID ${commentId} of article ID 
+		${badPostId}`, (done) => {
+		resource('PUT', `articles/${badPostId}`, 
+			{ text: commentEdit, commentId })
 			.then((body) => {
-				validateArticleFormat(body.articles)
+				validateArticle(body.articles)
 				expect(body.articles.length).to.equal(1)
-				expect(body.articles[0]._id).to.be.equal(notOwnedPostId)
+				expect(body.articles[0]._id).to.be.equal(badPostId)
 				const editted = body.articles[0].comments.filter(
 					(comment) => comment.commentId === commentId)
 				expect(editted.length).to.equal(1)
 				expect(editted[0].author).to.equal(loggedInUser)
-				expect(editted[0].text).to.equal(commentEdition)
-				return validatePersistency(
-					commentEdition, notOwnedPostId, -1, commentId)
+				expect(editted[0].text).to.equal(commentEdit)
+				return validatePersistence(
+					commentEdit, badPostId, -1, commentId)
 			})
 			.then(done)
 			.catch(done)
 	})
 
-	const newComment = 'def'
-	it(`should PUT a new comment on article ID ${notOwnedPostId}`, (done) => {
-		resource('PUT', `articles/${notOwnedPostId}`, 
+	const newPost = 'zzz'
+	it('should POST a new article', (done) => {
+		resource('GET', 'articles')
+			.then((body) => body.articles.length)
+			.then((postCnt) => {
+				resource('POST', 'article', { text: newPost })
+					.then((body) => {
+						validateArticle(body.articles)
+						expect(body.articles.length).to.equal(1)
+						expect(body.articles[0].author).to.equal(loggedInUser)
+						expect(body.articles[0].text).to.equal(newPost)
+						return validatePersistence(
+							newPost, body.articles[0]._id, postCnt + 1)
+					})
+					.then(done)
+					.catch(done)
+			})
+	})
+
+	const newComment = 'sss'
+	it(`should PUT new comment to article with ID ${badPostId}`, (done) => {
+		resource('PUT', `articles/${badPostId}`, 
 			{ text: newComment, commentId: -1 })
 			.then((body) => {
-				validateArticleFormat(body.articles)
+				validateArticle(body.articles)
 				expect(body.articles.length).to.equal(1)
-				expect(body.articles[0]._id).to.be.equal(notOwnedPostId)
+				expect(body.articles[0]._id).to.be.equal(badPostId)
 				const comments = body.articles[0].comments.filter(
 					(comment) => comment.text === newComment &&
 						comment.author === loggedInUser)
@@ -155,17 +172,17 @@ describe('Test Articles Stubs', () => {
 				const latest = comments.reduce((result, comment) =>
 					(new Date(result.date)) < (new Date(comment.date)) ?
 						comment : result)
-				return validatePersistency(
-					newComment, notOwnedPostId, -1, latest.commentId)
+				return validatePersistence(
+					newComment, badPostId, -1, latest.commentId)
 			})
 			.then(done)
 			.catch(done)
 	})
 
-	const notOwnedCommentId = 0
-	it('should not PUT edit to a comment not owned', (done) => {
+	const badId = 0
+	it('should not PUT edit to a comment if not the author', (done) => {
 		resource('PUT', `articles/${postId}`, 
-			{ text: newText, commentId: notOwnedCommentId })
+			{ text: newText, commentId: badId })
 			.then(() => {
 				throw new Error(-1)
 			})
@@ -174,24 +191,5 @@ describe('Test Articles Stubs', () => {
 			})
 			.then(done)
 			.catch(done)
-	})
-
-	const newPost = 'hello world'
-	it('should POST a new article', (done) => {
-		resource('GET', 'articles')
-			.then((body) => body.articles.length)
-			.then((postCnt) => {
-				resource('POST', 'article', { text: newPost })
-					.then((body) => {
-						validateArticleFormat(body.articles)
-						expect(body.articles.length).to.equal(1)
-						expect(body.articles[0].author).to.equal(loggedInUser)
-						expect(body.articles[0].text).to.equal(newPost)
-						return validatePersistency(
-							newPost, body.articles[0]._id, postCnt + 1)
-					})
-					.then(done)
-					.catch(done)
-			})
 	})
 })
