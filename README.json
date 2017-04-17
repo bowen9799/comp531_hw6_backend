@@ -1,5 +1,5 @@
 { 
      "netid": "bl19",
-  "frontend": "",
+  "frontend": "http://selfish-insect.surge.sh/",
    "backend": "https://powerful-ridge-79946.herokuapp.com/"
 }
